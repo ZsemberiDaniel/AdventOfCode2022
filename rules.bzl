@@ -7,9 +7,9 @@ def make_day(name):
     )
     native.genrule(
         name = "download_input",
-        srcs = [],
+        tools = ["//secrets:config.json"],
         outs = ["input"],
-        cmd = "ls $@ || wget --header 'cookie: session=53616c7465645f5fe3fbfb7a6dc118199720e3a84cf85728886e70d8b5f0d4a97742644bb32cd49364b1a216038e7e009bf76b004082c90f453b339c24d014b0' https://adventofcode.com/2022/day/3/input && mv input $@"
+        cmd = "ls $@ || wget --header 'cookie: session='`cat $(location //secrets:config.json) | jq -r \".session\"` https://adventofcode.com/2022/day/" + str(name) + "/input && mv input $@"
     )
 
     cc_binary(
