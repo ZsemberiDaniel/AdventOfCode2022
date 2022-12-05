@@ -16,6 +16,9 @@ def make_day(name):
         name = "day" + str(name),
         srcs = ["main.cpp"],
         data = ["input"],
-        deps = [":" + str(name) + "-lib"]
+        deps = [
+            ":" + str(name) + "-lib",
+            "//utils:utils-lib"
+        ]
     )
 
