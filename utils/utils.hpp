@@ -5,8 +5,6 @@
 #include <string>
 #include <vector>
 
-#include "HTTPRequest.hpp"
-
 namespace aoc_utils {
 
 void submitAnswer(const int day, const int subExercise,
@@ -30,7 +28,7 @@ void submitAnswer(const int day, const int subExercise,
         R"(curl -o "day_response.json" -d ")" + body +
         R"(" -H "Content-Type: application/x-www-form-urlencoded" -H ")" +
         cookie + R"(" -X POST )" + url +
-        R"( && (cat day_response.json | grep --silent "That's not the right answer." || echo 'Incorrect Answer!') && cat day_response.json | grep --silent "That's not the right answer." && echo 'Congratulations! Correct Answer!')";
+        R"( && (cat day_response.json | grep --silent "That's not the right answer." && echo 'Incorrect Answer!') && cat day_response.json | grep --silent "That's not the right answer." || echo 'Congratulations! Correct Answer!')";
 
     system(command.c_str());
   } catch (const std::exception& e) {

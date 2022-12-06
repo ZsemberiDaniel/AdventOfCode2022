@@ -1,4 +1,4 @@
 load("//:rules.bzl", "make_day")
 
-make_day(5)
+make_day(6)
 

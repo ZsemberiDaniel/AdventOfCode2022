@@ -15,31 +15,13 @@
 
 #include "utils/utils.hpp"
 
-typedef std::vector<std::stack<char>> Stacks;
-struct Instruction {
-  std::size_t from;
-  std::size_t to;
-  int amount;
+#define DAY 6
+
+struct Inputs {
+  std::string code;
 };
 
-std::istream& operator>>(std::istream& is, Instruction& obj) {
-  std::regex rgx("move ([0-9]+) from ([0-9]+) to ([0-9]+)");
-  std::smatch matches;
-  std::string line;
-  if (std::getline(is, line)) {
-    if (std::regex_match(line, matches, rgx)) {
-      obj.amount = std::stoi(matches[1]);
-      obj.from = std::stoi(matches[2]);
-      obj.to = std::stoi(matches[3]);
-    } else {
-      std::cout << "Regex didn't match " << line << std::endl;
-    }
-  }
-
-  return is;
-}
-
-void readMixedLines(int day, Stacks& stacks, std::vector<Instruction>& out) {
+void readInput(int day, Inputs& out) {
   std::ifstream istream;
 
   istream.open(aoc_utils::getFileNameFromDay(day), std::ios::in);
@@ -48,55 +30,84 @@ void readMixedLines(int day, Stacks& stacks, std::vector<Instruction>& out) {
     return;
   }
 
-  std::string line = "non empty line";
-  std::regex rgx("(\\[[A-Z]\\] |    )");
-  std::smatch matches;
-
-  std::vector<std::vector<char>> stacksReversed;
-  stacksReversed.resize(9);
-  while (std::getline(istream, line)) {
-    if (!line.empty()) {
-      line += " ";
-
-      int index = 0;
-      for (std::regex_iterator i =
-               std::sregex_iterator(line.begin(), line.end(), rgx);
-           i != std::sregex_iterator(); i++, index++) {
-        std::string matchStr = (*i).str();
-
-        if (matchStr[1] != ' ') {
-          stacksReversed[index].push_back(matchStr[1]);
-        }
-      }
-    } else {
-      break;
-    }
-  }
-
-  stacks.resize(stacksReversed.size());
-  for (std::size_t i = 0; i < stacksReversed.size(); i++) {
-    for (auto item = stacksReversed[i].rbegin();
-         item != stacksReversed[i].rend(); item++) {
-      stacks[i].push(*item);
-    }
-  }
-
-  aoc_utils::readLines(day, istream, out);
+  istream >> out.code;
 }
 
-void partOne(Stacks& stacks, const std::vector<Instruction>& instructions) {}
+std::string partOne(const Inputs& inputs) {
+  const std::string& code = inputs.code;
+  std::unordered_map<char, int> charCount;
+  for (std::size_t i = 0; i < 4; i++) {
+    if (charCount.contains(code[i])) {
+      charCount[code[i]] += 1;
+    } else {
+      charCount[code[i]] = 1;
+    }
+  }
 
-void partTwo(Stacks& stacks, const std::vector<Instruction>& instructions) {}
+  for (std::size_t i = 4; i < code.size(); i++) {
+    if (charCount.size() == 4) {
+      return std::to_string(i);
+    }
+
+    if (charCount.contains(code[i])) {
+      charCount[code[i]] += 1;
+    } else {
+      charCount[code[i]] = 1;
+    }
+
+    if (--charCount[code[i - 4]] == 0) {
+      charCount.erase(code[i - 4]);
+    }
+  }
+
+  return charCount.size() == 4 ? std::to_string(code.size() - 1)
+                               : "NO SOLUTION";
+}
+
+std::string partTwo(const Inputs& inputs) {
+  const std::string& code = inputs.code;
+  std::unordered_map<char, int> charCount;
+  const int distinct_size = 14;
+  for (std::size_t i = 0; i < distinct_size; i++) {
+    if (charCount.contains(code[i])) {
+      charCount[code[i]] += 1;
+    } else {
+      charCount[code[i]] = 1;
+    }
+  }
+
+  for (std::size_t i = distinct_size; i < code.size(); i++) {
+    if (charCount.size() == distinct_size) {
+      return std::to_string(i);
+    }
+
+    if (charCount.contains(code[i])) {
+      charCount[code[i]] += 1;
+    } else {
+      charCount[code[i]] = 1;
+    }
+
+    if (--charCount[code[i - distinct_size]] == 0) {
+      charCount.erase(code[i - distinct_size]);
+    }
+  }
+
+  return charCount.size() == distinct_size ? std::to_string(code.size() - 1)
+                               : "NO SOLUTION";
+}
 
 int main(int argc, char* argv[]) {
-  std::vector<Instruction> instructions;
-  Stacks stacks;
-  // readMixedLines(5, stacks, instructions);
+  Inputs inputs;
+  readInput(DAY, inputs);
 
-  if (argc > 1 && std::strcmp(argv[1], "submit")) {
-    aoc_utils::submitAnswer(5, 1, "answer");
+  std::string answer1 = partOne(inputs), answer2 = partTwo(inputs);
+  if (argc > 1 && std::strcmp(argv[1], "submit1") == 0) {
+    if (answer1.size() != 0) aoc_utils::submitAnswer(DAY, 1, answer1);
+  } else if (argc > 1 && std::strcmp(argv[1], "submit2") == 0) {
+    if (answer2.size() != 0) aoc_utils::submitAnswer(DAY, 2, answer2);
   } else {
-    // TODO
+    std::cout << "Answer 1: " << answer1 << std::endl;
+    std::cout << "Answer 2: " << answer2 << std::endl;
   }
 
   return 0;
